@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blockchain Shipment Tracking</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      max-width: 700px; /* increased from 480px */
+      width: 100%;
+      padding: 30px 40px;
+      box-sizing: border-box;
+    }
+
+    h1, h2 {
+      color: #4a3c8c;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input[type="text"] {
+      margin: 8px 0 16px 0;
+      padding: 12px 15px;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #764ba2;
+      outline: none;
+      box-shadow: 0 0 8px rgba(118, 75, 162, 0.4);
+    }
+
+    button {
+      background-color: #764ba2;
+      color: white;
+      border: none;
+      padding: 12px 0;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #5a357a;
+    }
+
+    #history {
+      margin-top: 30px;
+    }
+
+    .block {
+      background: #f7f5fb;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      color: #4a3c8c;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .block p {
+      margin: 6px 0;
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        padding: 20px;
+        max-width: 100%;
+      }
+
+      input[type="text"], button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Blockchain Shipment Management Tracking System</h1>
+
+    <h2>Add Shipment Event</h2>
+    <form id="shipmentForm">
+      <input type="text" id="shipmentId" placeholder="Shipment ID" required />
+      <input type="text" id="location" placeholder="Location" required />
+      <input type="text" id="status" placeholder="Status" required />
+      <button type="submit">Add Shipment Event</button>
+    </form>
+
+    <h2>Get Shipment History</h2>
+    <input type="text" id="historyShipmentId" placeholder="Shipment ID" />
+    <button id="getHistoryBtn">Get History</button>
+    <div id="history"></div>
+  </div>
+
+  <script>
+    const shipmentForm = document.getElementById('shipmentForm');
+    const historyDiv = document.getElementById('history');
+    const getHistoryBtn = document.getElementById('getHistoryBtn');
+
+    shipmentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const shipmentId = document.getElementById('shipmentId').value;
+      const location = document.getElementById('location').value;
+      const status = document.getElementById('status').value;
+
+      const response = await fetch('/addShipment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipmentId, location, status })
+      });
+      const data = await response.json();
+      alert(data.message || 'Shipment event added');
+      shipmentForm.reset();
+    });
+
+    getHistoryBtn.addEventListener('click', async () => {
+      const shipmentId = document.getElementById('historyShipmentId').value;
+      if (!shipmentId) {
+        alert('Please enter a shipment ID');
+        return;
+      }
+      const response = await fetch('/shipmentHistory/' + shipmentId);
+      const history = await response.json();
+      historyDiv.innerHTML = '';
+      if (history.length === 0) {
+        historyDiv.innerHTML = '<p>No shipment history found for this ID.</p>';
+        return;
+      }
+      history.forEach(block => {
+        const blockDiv = document.createElement('div');
+        blockDiv.className = 'block';
+        blockDiv.innerHTML = `
+          <p><strong>Index:</strong> ${block.index}</p>
+          <p><strong>Timestamp:</strong> ${block.timestamp}</p>
+          <p><strong>Location:</strong> ${block.shipmentData.location}</p>
+          <p><strong>Status:</strong> ${block.shipmentData.status}</p>
+          <p><strong>Hash:</strong> ${block.hash}</p>
+          <p><strong>Previous Hash:</strong> ${block.previousHash}</p>
+        `;
+        historyDiv.appendChild(blockDiv);
+      });
+    });
+  </script>
+</body>
+</html>

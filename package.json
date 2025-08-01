@@ -1,0 +1,14 @@
+{
+  "name": "blockchain-shipment-tracking",
+  "version": "1.0.0",
+  "description": "Blockchain Shipment Management Tracking System",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "crypto-js": "^4.1.1"
+  }
+}
